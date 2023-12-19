@@ -42,13 +42,3 @@
 .gallery__link:hover {
   cursor: zoom-in;
 }
-
-.modal_image-box {
-  width: 85vw;
-}
-
-.modal__image {
-  height: 100%;
-  width: 100%;
-  object-fit: contain;
-}

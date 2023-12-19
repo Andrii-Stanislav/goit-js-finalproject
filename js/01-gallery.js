@@ -2,60 +2,45 @@ import { galleryItems } from "./gallery-items.js";
 
 const galeryList = document.getElementById("gallery");
 
-galleryItems.forEach((item) => {
-  // creating and setting listItem
-  const itemElement = document.createElement("li");
-  itemElement.classList.add("gallery__item");
+// creating and setting modal
+const instance = basicLightbox.create('<img src="" alt="" class="modal__image"/>', {
+  onShow: () => document.addEventListener("keydown", closeOnEscClick),
+  onClose: () => document.removeEventListener("keydown", closeOnEscClick),
+});
 
-  // creating and setting link
-  const imageLink = document.createElement("a");
-  imageLink.classList.add("gallery__link");
-  imageLink.href = item.original;
-
-  // creating and setting modal
-  const instance = basicLightbox.create(
-    `
-    <div class="modal">
-        <div class="modal_image-box">
-            <img src="${item.original}" alt="${item.description}" class="modal__image"/>      
-        </div>
-    </div>
-`,
-    {
-      onShow: () => {
-        document.addEventListener("keydown", closeOnEscClick);
-      },
-      onClose: () => {
-        document.removeEventListener("keydown", closeOnEscClick);
-      },
-    }
-  );
-
-  function closeOnEscClick(event) {
-    if (event.code === "Escape") {
-      instance.close();
-    }
+function closeOnEscClick(event) {
+  if (event.code === "Escape") {
+    instance.close();
   }
+}
 
-  // opening modal on click link
-  imageLink.addEventListener("click", (event) => {
-    event.preventDefault();
-    instance.show();
-  });
+const listMarkup = galleryItems.reduce(
+  (acc, item) => `${acc}
+    <li class="gallery__item">
+      <a class="gallery__link" href="${item.original}">
+        <img
+          class="gallery__image"
+          src="${item.preview}"
+          data-source="${item.original}"
+          alt="${item.description}"
+        />
+      </a>
+    </li>
+    `,
+  ""
+);
 
-  // creating and setting image
-  const image = document.createElement("img");
-  image.src = item.preview;
-  image.alt = item.description;
-  image.classList.add("gallery__image");
-  image.setAttribute("data-source", item.original);
+galeryList.insertAdjacentHTML("beforeend", listMarkup);
 
-  // put image inside the link
-  imageLink.append(image);
+galeryList.addEventListener("click", (event) => {
+  event.preventDefault();
+  if (event.target.nodeName !== "IMG") return;
 
-  // put link inside the listItem
-  itemElement.append(imageLink);
+  const modalImgSrc = event.target.dataset.source;
+  const modalImgAlt = event.target.alt;
 
-  // adding listItem to the galeryList
-  galeryList.append(itemElement);
+  const modalImg = instance.element().querySelector(".modal__image");
+  modalImg.src = modalImgSrc;
+  modalImg.alt = modalImgAlt;
+  instance.show();
 });
